@@ -33,7 +33,7 @@ const handleSubmit = async (e) => {
       contacto: contacto // Incluye el dato adicional en la solicitud
     };
 
-    const response = await fetch('http://localhost:5006/procesar_pago', {
+    const response = await fetch('http://localhost:5003/realizar_pago_y_notificar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -132,106 +132,108 @@ const handleSubmit = async (e) => {
             <option value="whatsapp">WhatsApp</option>
           </select>
         </label>
-      </form>
 
-{/* Campo adicional según el canal seleccionado */}
-{canal === 'email' && (
-  <label>
-    Correo electrónico:
-    <input
-      type="email"
-      value={contacto}
-      onChange={e => setContacto(e.target.value)}
-      placeholder="usuario@ejemplo.com"
-      required
-    />
-  </label>
-)}
-{(canal === 'sms' || canal === 'whatsapp') && (
-  <label>
-    Número de teléfono:
-    <input
-      type="tel"
-      value={contacto}
-      onChange={e => setContacto(e.target.value)}
-      placeholder="+1234567890"
-      required
-    />
-  </label>
-)}
+        {/* Campo adicional según el canal seleccionado */}
+        {canal === 'email' && (
+          <label>
+            Correo electrónico:
+            <input
+              type="email"
+              value={contacto}
+              onChange={e => setContacto(e.target.value)}
+              placeholder="usuario@ejemplo.com"
+              required
+            />
+          </label>
+        )}
+        {(canal === 'sms' || canal === 'whatsapp') && (
+          <label>
+            Número de teléfono:
+            <input
+              type="tel"
+              value={contacto}
+              onChange={e => setContacto(e.target.value)}
+              placeholder="+1234567890"
+              required
+            />
+          </label>
+        )}
+                <label>
+                  Monto:
+                  <input type="number" value={monto} onChange={e => setMonto(e.target.value)} />
+        </label>
+
+        {/* Nuevos controles para personalizar el PDF */}
         <label>
-          Monto:
-          <input type="number" value={monto} onChange={e => setMonto(e.target.value)} />
-</label>
+          <input
+            type="checkbox"
+            checked={includeLogo}
+            onChange={e => setIncludeLogo(e.target.checked)}
+          />
+          Incluir Logo
+        </label>
 
-{/* Nuevos controles para personalizar el PDF */}
-<label>
-  <input
-    type="checkbox"
-    checked={includeLogo}
-    onChange={e => setIncludeLogo(e.target.checked)}
-  />
-  Incluir Logo
-</label>
+        <label>
+          <input
+            type="checkbox"
+            checked={includePaymentDetails}
+            onChange={e => setIncludePaymentDetails(e.target.checked)}
+          />
+          Incluir Detalles del Pago
+        </label>
 
-<label>
-  <input
-    type="checkbox"
-    checked={includePaymentDetails}
-    onChange={e => setIncludePaymentDetails(e.target.checked)}
-  />
-  Incluir Detalles del Pago
-</label>
+        <label>
+          <input
+            type="checkbox"
+            checked={includePaymentDetails}
+            onChange={e => setIncludePaymentDetails(e.target.checked)}
+          />
+          Incluir Detalles del Pago
+        </label>
 
-<label>
-  <input
-    type="checkbox"
-    checked={includePaymentDetails}
-    onChange={e => setIncludePaymentDetails(e.target.checked)}
-  />
-  Incluir Detalles del Pago
-</label>
+        <label>
+          <input
+            type="checkbox"
+            checked={includeUserInfo}
+            onChange={e => setIncludeUserInfo(e.target.checked)}
+          />
+          Incluir Información del Usuario
+        </label>
 
-<label>
-  <input
-    type="checkbox"
-    checked={includeUserInfo}
-    onChange={e => setIncludeUserInfo(e.target.checked)}
-  />
-  Incluir Información del Usuario
-</label>
+        <label>
+          <input
+            type="checkbox"
+            checked={includeTimestamp}
+            onChange={e => setIncludeTimestamp(e.target.checked)}
+          />
+          Incluir Fecha y Hora
+        </label>
 
-<label>
-  <input
-    type="checkbox"
-    checked={includeTimestamp}
-    onChange={e => setIncludeTimestamp(e.target.checked)}
-  />
-  Incluir Fecha y Hora
-</label>
-
-<label>
-  Mensaje en el Pie:
-  <input
-    type="text"
-    value={footerMessage}
-    onChange={e => setFooterMessage(e.target.value)}
-  />
-</label>
-
-<button type="button" onClick={handleGenerateReport}>Generar Reporte PDF</button>
-<button type="submit">Enviar</button>
-      position="top-right"
-      autoClose={9000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme={tema === 'oscuro' ? 'dark' : 'light'}
+        <label>
+          Mensaje en el Pie:
+          <input
+            type="text"
+            value={footerMessage}
+            onChange={e => setFooterMessage(e.target.value)}
+          />
+          <button type="button" onClick={handleGenerateReport}>Generar Reporte PDF</button> 
+          <button type="submit">Enviar</button>
+        </label>
+        </form>
+        <hr/>
+        <ToastContainer
+              position="top-right"
+              autoClose={9000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme={tema === 'oscuro' ? 'dark' : 'light'}
+              />
     </div>
-  );
-}
+    );
+  }
 
-export default App;
+  export default App;
