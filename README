@@ -1,0 +1,9 @@
+En caso de no tener el entorno de desarrollo ENV de PYTHON, 
+ir a la carpeta correspondiente y ejecutar el siguiente comando:
+#python -m venv venv
+#venv\Scripts\activate
+#pip install -r requirements.txt
+#deactivate
+
+Luego en el Frontend ejecutar el siguiente comando:
+#npm install

@@ -1,0 +1,11 @@
+# Ignorar entornos virtuales
+venv/
+**/venv/
+
+# Ignorar configuraciones de IDE
+.vscode/
+.idea/
+
+# Ignorar otros archivos sensibles
+.env
+.DS_Store
