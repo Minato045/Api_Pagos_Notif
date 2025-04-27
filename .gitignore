@@ -7,5 +7,4 @@ venv/
 .idea/
 
 # Ignorar otros archivos sensibles
-.env
 .DS_Store
