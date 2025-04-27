@@ -16,15 +16,23 @@ def realizar():
     monto = data["monto"]
     canal = data["canal"]
     tema = data["tema"]
+    contacto = data.get('contacto') 
 
     # Procesar pago
-    pago_res = requests.post("http://localhost:5001/procesar_pago", json={"tipo": tipo_pago, "monto": monto})
+    pago_res = requests.post("http://localhost:5001/procesar_pago", json={
+        "tipo": tipo_pago,
+        "monto": monto
+    })
     if pago_res.status_code != 200:
         return jsonify({"error": "Error al procesar el pago"}), 500
     pago_res = pago_res.json()
 
     # Notificar
-    notificacion_res = requests.post("http://localhost:5002/enviar_notificacion", json={"canal": canal, "mensaje": pago_res["resultado"]})
+    notificacion_res = requests.post("http://localhost:5002/enviar_notificacion", json={
+        "canal": canal,
+        "mensaje": pago_res["resultado"],
+        "contacto": contacto
+    })
     if notificacion_res.status_code != 200:
         return jsonify({"error": "Error al enviar la notificación"}), 500
     notificacion_res = notificacion_res.json()
