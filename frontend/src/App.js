@@ -17,6 +17,7 @@ const [includeTimestamp, setIncludeTimestamp] = useState(true);
 const [footerMessage, setFooterMessage] = useState("Gracias por su pago");
 const [contacto, setContacto] = useState(''); // Nuevo estado para el dato adicional
 
+
   useEffect(() => {
     document.body.className = tema; // actualiza el body con la clase del tema
   }, [tema]);
@@ -70,7 +71,6 @@ const handleSubmit = async (e) => {
         theme: tema === 'oscuro' ? 'dark' : 'light',
       }
     );
-
   } catch (error) {
     toast.error('❌ Error al procesar el pago');
   }
@@ -243,6 +243,6 @@ const handleSubmit = async (e) => {
               />
     </div>
     );
-  }
+  };
 
-  export default App;
+  export default App; 

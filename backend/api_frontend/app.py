@@ -8,6 +8,9 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
+
 
 @app.route("/realizar_pago_y_notificar", methods=["POST"])
 def realizar():

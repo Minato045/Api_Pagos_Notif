@@ -12,6 +12,8 @@ def enviar_notificacion():
     mensaje = data["mensaje"]
     contacto = data.get("contacto")
 
+    contacto = data.get("contacto")
+
     notificacion = NotificacionFactory.crear_notificacion(canal)
 
     if canal == "email":
