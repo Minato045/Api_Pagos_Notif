@@ -9,66 +9,118 @@ function App() {
   const [tema, setTema] = useState('claro');
   const [monto, setMonto] = useState(100);
   const [htmlResponse, setHtmlResponse] = useState('');
-  const [contacto, setContacto] = useState(''); // Nuevo estado para el dato adicional
+// Nuevas opciones para personalizar el PDF
+const [includeLogo, setIncludeLogo] = useState(true);
+const [includePaymentDetails, setIncludePaymentDetails] = useState(true);
+const [includeUserInfo, setIncludeUserInfo] = useState(false);
+const [includeTimestamp, setIncludeTimestamp] = useState(true);
+const [footerMessage, setFooterMessage] = useState("Gracias por su pago");
+const [contacto, setContacto] = useState(''); // Nuevo estado para el dato adicional
 
   useEffect(() => {
     document.body.className = tema; // actualiza el body con la clase del tema
   }, [tema]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
+// Función para alternar el tema
+const toggleTema = () => {
+  setTema(prevTema => (prevTema === 'claro' ? 'oscuro' : 'claro'));
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
     const body = {
       tipo_pago: tipoPago,
       canal: canal,
       tema: tema,
       monto: monto,
-      contacto: contacto // Incluye el dato adicional en la solicitud
+      contacto: contacto // Cambiar "contacto" a "to_phone"
+    };
+
+    const response = await fetch('http://localhost:5003/realizar_pago_y_notificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const html = await response.text();
+    setHtmlResponse(html);
+
+    // 🧼 Limpiar el HTML para quitar encabezado y pie de página
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = html;
+
+    // Remover <header> y <footer>
+    const header = tempElement.querySelector('header');
+    const footer = tempElement.querySelector('footer');
+    if (header) header.remove();
+    if (footer) footer.remove();
+
+    // ✅ Mostrar HTML estilizado en el toast
+    toast(
+      <div dangerouslySetInnerHTML={{ __html: tempElement.innerHTML }} />,
+      {
+        autoClose: 8000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        position: "top-right",
+        theme: tema === 'oscuro' ? 'dark' : 'light',
+      }
+    );
+
+  } catch (error) {
+    toast.error('❌ Error al procesar el pago');
+  }
+};  
+
+  const handleGenerateReport = async () => {
+    const body = {
+      tipo: tipoPago,
+      monto: monto,
+      includeLogo: includeLogo,
+      title: "Reporte de Pago",
+      includePaymentDetails: includePaymentDetails,
+      includeUserInfo: includeUserInfo,
+      theme: tema === "oscuro" ? "DARK" : "LIGHT",
+      includeTimestamp: includeTimestamp,
+      footerMessage: footerMessage,
+      format: "A4",
     };
   
     try {
-      const response = await fetch('http://localhost:5003/realizar_pago_y_notificar', {
+      const response = await fetch('http://localhost:5006/generar_reporte_pago', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
   
-      const html = await response.text();
-      setHtmlResponse(html);
+      if (!response.ok) {
+        throw new Error('Error al generar el reporte');
+      }
   
-      // 🧼 Limpiar el HTML para quitar encabezado y pie de página
-      const tempElement = document.createElement('div');
-      tempElement.innerHTML = html;
-  
-      // Remover <header> y <footer>
-      const header = tempElement.querySelector('header');
-      const footer = tempElement.querySelector('footer');
-      if (header) header.remove();
-      if (footer) footer.remove();
-  
-      // ✅ Mostrar HTML estilizado en el toast
-      toast(
-        <div dangerouslySetInnerHTML={{ __html: tempElement.innerHTML }} />,
-        {
-          autoClose: 8000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          position: "top-right",
-          theme: tema === 'oscuro' ? 'dark' : 'light',
-        }
-      );
-  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reporte_pago.pdf';
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      toast.error('❌ Error al procesar el pago');
+      toast.error('❌ Error al generar el reporte');
     }
-  };  
+  };
 
   return (
     <div className="app-container">
       <img src="/logo.png" alt="Logo" className="logo" />
       <h1>Simulador de Pagos</h1>
+
+      <button onClick={toggleTema} className="toggle-tema-btn">
+        Cambiar a {tema === 'claro' ? 'Oscuro' : 'Claro'}
+      </button>
 
       <form onSubmit={handleSubmit} className="formulario">
         <label>
@@ -115,45 +167,82 @@ function App() {
             />
           </label>
         )}
+                <label>
+                  Monto:
+                  <input type="number" value={monto} onChange={e => setMonto(e.target.value)} />
+        </label>
 
+        {/* Nuevos controles para personalizar el PDF */}
         <label>
-          Tema visual:
-          <select value={tema} onChange={e => setTema(e.target.value)}>
-            <option value="claro">Claro</option>
-            <option value="oscuro">Oscuro</option>
-          </select>
+          <input
+            type="checkbox"
+            checked={includeLogo}
+            onChange={e => setIncludeLogo(e.target.checked)}
+          />
+          Incluir Logo
         </label>
 
         <label>
-          Monto:
-          <input type="number" value={monto} onChange={e => setMonto(e.target.value)} />
+          <input
+            type="checkbox"
+            checked={includePaymentDetails}
+            onChange={e => setIncludePaymentDetails(e.target.checked)}
+          />
+          Incluir Detalles del Pago
         </label>
 
-        <button type="submit">Enviar</button>
-      </form>
+        <label>
+          <input
+            type="checkbox"
+            checked={includePaymentDetails}
+            onChange={e => setIncludePaymentDetails(e.target.checked)}
+          />
+          Incluir Detalles del Pago
+        </label>
 
-      <hr />
+        <label>
+          <input
+            type="checkbox"
+            checked={includeUserInfo}
+            onChange={e => setIncludeUserInfo(e.target.checked)}
+          />
+          Incluir Información del Usuario
+        </label>
 
-      <h2>Respuesta del servidor:</h2>
-      <div
-        className="respuesta-servidor"
-        dangerouslySetInnerHTML={{ __html: htmlResponse }}
-      />
+        <label>
+          <input
+            type="checkbox"
+            checked={includeTimestamp}
+            onChange={e => setIncludeTimestamp(e.target.checked)}
+          />
+          Incluir Fecha y Hora
+        </label>
 
-      {/* Componente ToastContainer 👇 */}
-      <ToastContainer
-        position="top-right"
-        autoClose={9000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={tema === 'oscuro' ? 'dark' : 'light'}
-      />
+        <label>
+          Mensaje en el Pie:
+          <input
+            type="text"
+            value={footerMessage}
+            onChange={e => setFooterMessage(e.target.value)}
+          />
+          <button type="button" onClick={handleGenerateReport}>Generar Reporte PDF</button> 
+          <button type="submit">Enviar</button>
+        </label>
+        </form>
+        <hr/>
+        <ToastContainer
+              position="top-right"
+              autoClose={9000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme={tema === 'oscuro' ? 'dark' : 'light'}
+              />
     </div>
-  );
-}
+    );
+  }
 
-export default App;
+  export default App;
